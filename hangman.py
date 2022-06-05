@@ -1,163 +1,69 @@
 import random
-from words import word_list
+import math
 
-def get_word():
-    word = random.choice(word_list)
-    while '-' in word or ' ' in word:
-        word = random.choice(word_list)
-    return word.upper()
+def play():
+    print('\n')
+    user = input("What's your choice? 'r' for rock, 'p' for paper, 's' for scissors\n")
+    user = user.lower()
 
-
-def play(word):
-    word_completion = '-' * len(word)
-    guessed = False
-    guessed_letters = []
-    guessed_words = []
-
-    lives = 6
-
-    print("Let's play Hangman!")
-    print(display_hangman(lives))
-    print('You have used these letters: ', ' '.join(guessed_letters))
-    print('Current word: ', ' '.join(word_completion))
-    print('\n')   
-    
-    while not guessed and lives > 0:
-
-        guess = input('Please guess a letter or word: ').upper()
-
-        if len(guess) == 1 and guess.isalpha():
-            if guess in guessed_letters:
-                print("You have already guessed the character", guess)
-            
-            elif guess not in word:
-                print(guess, 'is not in the word.')
-                lives = lives - 1
-                guessed_letters.append(guess)
-            
-            else:
-                print(f'Good job! {guess} is in the word.')
-                guessed_letters.append(guess)
-                word_as_list = list(word_completion)
-                indices = [i for i, letter in enumerate(word) if letter == guess]
-                for index in indices:
-                    word_as_list[index] = guess
-                word_completion = "".join(word_as_list)
-
-                if '-' not in word_completion:
-                    guessed = True
-        
-        elif len(guess) == len(word) and guess.isalpha():
-            if guess in guessed_words:
-                print('You have already guessed the word', guess)
-            
-            elif guess != word:
-                print(guess, 'is not the word.')
-                lives = lives - 1
-                guessed_words.append(guess)
-            
-            else:
-                guessed = True
-                word_completion = word
-        
-        else:
-            print("This is not a valid guess. Please try again.")
-        
-        print(display_hangman(lives))
-        print('You have used these letters: ', ' '.join(guessed_letters))
-        print('Current word: ', ' '.join(word_completion))
-        print('\n')
-
-    
-    if guessed:
-        print(f'Congratulations! You have guessed the word {word} correctly!')
+    if user == 'r':
+        user == 'rock'
+    elif user == 'p':
+        user == 'paper'
     else:
-        print(f'Sorry, you ran out of lives. The correct word was {word}.')
+        user == 'scissors'
 
+    computer = random.choice(['rock', 'paper', 'scissors'])
 
+    if user == computer:
+        return (0, user, computer)
 
-def display_hangman(lives):
-    stages = [  # final state: head, torso, both arms, and both legs
-                """
-                    ---------
-                    |/      |
-                    |       O
-                    |      \|/
-                    |       |
-                    |      / \
-                   ---
-                """,
-                # head, torso, both arms, and one leg
-                """
-                    ---------
-                    |/      |
-                    |       O
-                    |      \|/
-                    |       |
-                    |      / 
-                   ---
-                """,
-                # head, torso, and both arms
-                """
-                    ---------
-                    |/      |
-                    |       O
-                    |      \|/
-                    |       |
-                    |      
-                   ---
-                """,
-                # head, torso, and one arm
-                """
-                    ----------
-                    |/       |
-                    |        O
-                    |       \|
-                    |        |
-                    |     
-                   ---
-                """,
-                # head and torso
-                """
-                    ---------
-                    |/      |
-                    |       O
-                    |       |
-                    |       |
-                    |     
-                   ---
-                """,
-                # head
-                """
-                    ---------
-                    |/      |
-                    |       O
-                    |    
-                    |      
-                    |     
-                   ---
-                """,
-                # initial empty state
-                """
-                    ---------
-                    |/      |
-                    |      
-                    |    
-                    |      
-                    |     
-                   ---
-                """
-    ]
-    return stages[lives]
+    # r > s, s > p, p > r
+    if is_win(user, computer):
+        return (1, user, computer)
 
+    return (-1, user, computer)
 
-def main():
-    word = get_word()
-    play(word)
-    while input('Play again? (Y/N)').upper == 'Y':
-        word = get_word()
-        play(word)
+def is_win(player, opponent):
+    # return true is the player beats the opponent
+    # winning conditions: r > s, s > p, p > r
+    if (player == 'rock' and opponent == 'scissors') or (player == 'scissors' and opponent == 'paper') or (player == 'paper' and opponent == 'rock'):
+        return True
+    return False
 
+def play_best_of():
+    # play against the computer until someone wins best of n games
+    # to win, you must win ceil(n/2) games (ie 2/3, 3/5, 4/7)
+    print('\n')
+    no_of_game = int(input('How many games you want to play: '))
+    while no_of_game % 2 == 0: 
+        print('Please enter an odd number!')
+        no_of_game = int(input('How many games you want to play: '))
 
-if __name__ == "__main__":
-    main()
+    player_wins = 0
+    computer_wins = 0
+    wins_necessary = math.ceil(no_of_game/2)
+    while player_wins < wins_necessary and computer_wins < wins_necessary:
+        result, user, computer = play()
+        # tie
+        if result == 0:
+            print('It is a tie. You and the computer have both chosen {}. \n'.format(user))
+            print(f'Current score: You {player_wins} - {computer_wins} Computer')
+        # you win
+        elif result == 1:
+            player_wins = player_wins + 1
+            print('You chose {} and the computer chose {}. You won!\n'.format(user, computer))
+            print(f'Current score: You {player_wins} - {computer_wins} Computer')
+        else:
+            computer_wins = computer_wins + 1
+            print('You chose {} and the computer chose {}. You lost :(\n'.format(user, computer))
+            print(f'Current score: You {player_wins} - {computer_wins} Computer')
+
+    if player_wins > computer_wins:
+        print('\n')
+        print('You have won the best of {} games! What a champ :D'.format(no_of_game))
+    else:
+        print('\n')
+        print('Unfortunately, the computer has won the best of {} games. Better luck next time!'.format(no_of_game))
+
+play_best_of()
