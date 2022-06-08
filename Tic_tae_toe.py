@@ -62,16 +62,6 @@ def check_if_win():
     return check_same(board[0:3]) or check_same(board[3:6]) or check_same(board[3:6]) or check_same(board[6:9]) or check_same(board[::3]) or check_same(board[1::3]) or check_same(board[2::3]) or check_same(board[::4]) or check_same(board[2:7:2])
 
 
-def check_for_tie():
-    global end
-    for x in board:
-        if x != int:
-            end = False
-        else:
-            end = True
-
-
-
 def flip_player():
     global current_player
     current_player = "O" if current_player == "X" else "X"
